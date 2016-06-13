@@ -100,6 +100,20 @@ extern char **environ;
 # define PRIsize_t "zu"
 #endif
 
+#if defined(__clang__)
+# if __has_feature(address_sanitizer)
+#  define WATCHMAN_ASAN 1
+# endif
+#elif defined (__GNUC__) && \
+      (((__GNUC__ == 4) && (__GNUC_MINOR__ >= 8)) || (__GNUC__ >= 5)) && \
+      __SANITIZE_ADDRESS__
+# define WATCHMAN_ASAN 1
+#endif
+
+#ifndef WATCHMAN_ASAN
+# define WATCHMAN_ASAN 0
+#endif
+
 extern char *poisoned_reason;
 struct watchman_string;
 typedef struct watchman_string w_string_t;
@@ -950,7 +964,8 @@ json_int_t cfg_get_int(w_root_t *root, const char *name,
     json_int_t defval);
 bool cfg_get_bool(w_root_t *root, const char *name, bool defval);
 double cfg_get_double(w_root_t *root, const char *name, double defval);
-mode_t cfg_get_perms(w_root_t *root, const char *name, bool execute_bits);
+mode_t cfg_get_perms(w_root_t *root, const char *name, bool write_bits,
+                     bool execute_bits);
 const char *cfg_get_trouble_url(void);
 json_t *cfg_compute_root_files(bool *enforcing);
 
