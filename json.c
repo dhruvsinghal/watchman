@@ -504,7 +504,10 @@ bool w_json_buffer_write_bser(w_jbuffer_t *jr, w_stm_t stm, json_t *json)
   struct jbuffer_write_data data = { stm, jr };
   int res;
 
-  res = w_bser_write_pdu(json, jbuffer_write, &data);
+  bser_ctx_t ctx = { .bser_version = 1, .capabilities = 0,
+    .dump = jbuffer_write };
+
+  res = w_bser_write_pdu(&ctx, json, &data);
 
   if (res != 0) {
     return false;
